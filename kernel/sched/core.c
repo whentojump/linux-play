@@ -3746,7 +3746,13 @@ ttwu_do_activate(struct rq *rq, struct task_struct *p, int wake_flags,
 		u64 delta = rq_clock(rq) - rq->idle_stamp;
 		u64 max = 2*rq->max_idle_balance_cost;
 
+		// volatile u64 before = rq->avg_idle;
 		update_avg(&rq->avg_idle, delta);
+		// volatile u64 after = rq->avg_idle;
+
+		// if (before == after) {
+		// 	printk("avg_idle not changed\n");
+		// }
 
 		if (rq->avg_idle > max)
 			rq->avg_idle = max;
