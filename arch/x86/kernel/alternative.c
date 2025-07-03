@@ -2214,6 +2214,7 @@ void *text_poke(void *addr, const void *opcode, size_t len)
 
 	return __text_poke(text_poke_memcpy, addr, opcode, len);
 }
+EXPORT_SYMBOL_GPL(text_poke);
 
 /**
  * text_poke_kgdb - Update instructions on a live kernel by kgdb
