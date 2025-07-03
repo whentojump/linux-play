@@ -2,24 +2,34 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/text-patching.h>
+#include <linux/param.h>
+
+#define MAX_INSN_LEN 16
+
+static ulong target_addr = 0;
+module_param(target_addr, ulong, 0644);
+MODULE_PARM_DESC(target_addr, "Target instruction address");
+
+static unsigned char new_insn[MAX_INSN_LEN];
+static int new_insn_len;
+module_param_array(new_insn, byte, &new_insn_len, 0644);
+MODULE_PARM_DESC(new_insn, "Byte array for new instruction");
 
 static int __init my_init(void)
 {
-    // Replace this with the actual address of the instruction to patch
-    void *target = (void *)0xffffffff812d1fad;
+    if (!target_addr || new_insn_len == 0) {
+        pr_err("Missing target_addr or new_insn!\n");
+        return -EINVAL;
+    }
 
-    // Example: sar $0x2, %rax = 48 c1 f8 02
-    unsigned char new_insn[] = { 0x48, 0xc1, 0xf8, 0x02 };
-
-    pr_info("Patching instruction at %px\n", target);
-    text_poke(target, new_insn, sizeof(new_insn));
-
+    pr_info("Patching %d bytes at %px\n", new_insn_len, (void *)target_addr);
+    text_poke((void *)target_addr, new_insn, new_insn_len);
     return 0;
 }
 
 static void __exit my_exit(void)
 {
-    // Optional: restore original instruction if known
+    pr_info("rewrite module unloaded\n");
 }
 
 module_init(my_init);
